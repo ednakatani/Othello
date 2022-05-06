@@ -5,20 +5,30 @@ Written by Patrick Feltes
 '''
 
 
-def printBoard(board):
+from numpy import character
+
+
+def printBoard(board: list) -> None:
+	'''
+	Print game board in console
+	'''
 	print('  0 1 2 3 4 5 6 7 ')
 	for r in range(len(board)):
 		s = str(r) + '|'
 		for c in range(len(board[r])):
 			s += board[r][c] + '|'
 		print(s + str(r))
+
 	print('  0 1 2 3 4 5 6 7 ')
 	(black, white) = getScore(board)
 	print('SCORE:')
 	print('B: ' + str(black))
 	print('W: ' + str(white))
 
-def getScore(board):
+def getScore(board: list) -> tuple:
+	'''
+	For each record in board list count blacks and whites
+	'''
 	black = 0
 	white = 0
 	
@@ -30,7 +40,10 @@ def getScore(board):
 				white += 1
 	return (black, white)
 
-def getPossibleMoves(board, player):
+def getPossibleMoves(board: list, player: character) -> list:
+	'''
+	Iterate over the game board, searching possible moves for the player
+	'''
 	# seems like this could be made more efficient, why populate so many lists if unnecessary?
 	moves = []
 
@@ -43,10 +56,13 @@ def getPossibleMoves(board, player):
 					moves.append((x, y))
 	return moves
 
-def isLegalMove(board, r, c, player):
+def isLegalMove(board: list, r: int, c: int, player) -> bool:
+	'''
+	Verify if is possible to insert a piece in a position
+	'''
 	return board[r][c] == ' '
 
-def getIncludedPieces(board, xStart, yStart, xDir, yDir, player):
+def getIncludedPieces(board, xStart, yStart, xDir, yDir, player) -> list:
 	included = []
 
 	if player == 'B':
@@ -86,6 +102,8 @@ def getPiecesToFlip(board, x, y, player):
 	flip.extend((getIncludedPieces(board, x, y, -1, 0, player)))
 	flip.extend((getIncludedPieces(board, x, y, -1, -1, player)))
 
+	##print(list(set(flip)))
+
 	# use a set to remove duplicates
 	return list(set(flip))
 
@@ -97,8 +115,12 @@ def flipPieces(board, flip, player):
 
 def promptMove(board, player):
 	print(player + " player's turn!")
-		
+	
 	possibilites = getPossibleMoves(board, player)
+
+	print("")
+	print(possibilites)
+	print("")
 
 	# move can't be made! let other player move!
 	if len(possibilites) == 0:
@@ -127,7 +149,7 @@ def promptMove(board, player):
 
 	return board
 
-def isBoardFull(board):
+def isBoardFull(board) -> bool:
 	full = True
 
 	for r in board:
