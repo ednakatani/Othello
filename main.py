@@ -4,9 +4,39 @@ Written by Patrick Feltes
 11/2/15
 '''
 
+import copy
+from os import system, name
 
-from numpy import character
 
+WEIGHTS = [
+
+  [ 4, -3,  2,  2,  2,  2, -3,  4],
+  [-3, -4, -1, -1, -1, -1, -4, -3],
+  [ 2, -1,  1,  0,  0,  1, -1,  2],
+  [ 2, -1,  0,  1,  1,  0, -1,  2],
+  [ 2, -1,  0,  1,  1,  0, -1,  2],
+  [ 2, -1,  1,  0,  0,  1, -1,  2],
+  [-3, -4, -1, -1, -1, -1, -4, -3],
+  [ 4, -3,  2,  2,  2,  2, -3,  4]
+
+]
+
+IA = 'W'
+MIN = -200
+MAX = 200
+DEPTH = 3
+
+def cls():
+    if name == 'nt':
+        _ = system('cls')
+    else:
+        _ = system('clear')
+		
+def getotherPlayer(player) -> str:
+	if player == 'W':
+		return 'B'
+	else:
+		return 'W'
 
 def printBoard(board: list) -> None:
 	'''
@@ -40,7 +70,7 @@ def getScore(board: list) -> tuple:
 				white += 1
 	return (black, white)
 
-def getPossibleMoves(board: list, player: character) -> list:
+def getPossibleMoves(board: list, player) -> list:
 	'''
 	Iterate over the game board, searching possible moves for the player
 	'''
@@ -117,11 +147,7 @@ def promptMove(board, player):
 	print(player + " player's turn!")
 	
 	possibilites = getPossibleMoves(board, player)
-
-	print("")
-	print(possibilites)
-	print("")
-
+	
 	# move can't be made! let other player move!
 	if len(possibilites) == 0:
 		return False
@@ -129,18 +155,32 @@ def promptMove(board, player):
 	xMove = -1
 	yMove = -1
 
-	while (xMove, yMove) not in possibilites:
-		while xMove < 0 or xMove >= len(board):
-			print('Enter a x coordinate(column):')
-			xMove = int(input())
+	
+	if player == IA:
+		max = (MIN,)
+		for (b,(x,y)) in getMoves(board, player):
+			h = minimax(b, player, DEPTH, True)
+			if h > max[0]:
+				max = (h,x,y)
+		
+		xMove = max[1]
+		yMove = max[2]	
+	
+	else:
 
-		while yMove < 0 or yMove >= len(board):
-			print('Enter a y coordinate(row):')
-			yMove = int(input())
+		while (xMove, yMove) not in possibilites:
+			while xMove < 0 or xMove >= len(board):
+				print('Enter a x coordinate(column):')
+				xMove = int(input())
 
-		if (xMove, yMove) not in possibilites:
-			xMove = -1
-			yMove = -1
+			while yMove < 0 or yMove >= len(board):
+				print('Enter a y coordinate(row):')
+				yMove = int(input())
+
+			if (xMove, yMove) not in possibilites:
+				xMove = -1
+				yMove = -1
+	
 
 	flip = getPiecesToFlip(board, xMove, yMove, player)
 	board[yMove][xMove] = player
@@ -148,6 +188,18 @@ def promptMove(board, player):
 	board = flipPieces(board, flip, player)
 
 	return board
+
+def MakeMove(board, x, y, player):
+	temp_board = [x[:] for x in board]
+	temp_flip = getPiecesToFlip(temp_board, x, y, player)
+	temp_board[y][x] = player
+
+	temp_board = flipPieces(temp_board, temp_flip, player)
+	(b,w) = getScore(temp_board)
+	if player == "B":
+		return (temp_board,w)
+	
+	return (temp_board,b)
 
 def isBoardFull(board) -> bool:
 	full = True
@@ -158,12 +210,85 @@ def isBoardFull(board) -> bool:
 				full = False
 	return full
 
+def gameOver(board):
+	return len(getPossibleMoves(board, 'W')) == 0 and len(getPossibleMoves(board, 'B')) == 0
+
+def getMoves(board,player):
+	possibilites = getPossibleMoves(board, player)
+	moves = []
+	
+	for p in possibilites:
+
+		move = []
+
+		temp_board = [x[:] for x in board]
+		x = p[0]
+		y = p[1]
+
+		temp_flip = getPiecesToFlip(temp_board, x, y, player)
+		temp_board[y][x] = player
+
+		temp_board = flipPieces(temp_board, temp_flip, player)
+		
+		
+		moves.append((temp_board,(x,y)))
+
+		#print(p,':',heuristic(player,temp_board))
+
+	return moves
+
+def getTree(board, depth, player):
+	p = ''
+	for i in range(depth):
+		if i%2 == 0: 
+			p = player
+		else:
+			p = getotherPlayer(player) 
+		
+		getMoves(board, p)
+
+def heuristic(board, player):
+
+	total = 0
+	for x in range(len(board)):
+		for y in range(len(board[x])):
+			if board[x][y] == player:
+				total += WEIGHTS[x][y]
+			elif board[x][y] != '':
+				total -= WEIGHTS[x][y]
+	return total
+
+
+def minimax(board, player, depth, maximizingPlayer):
+	
+	if depth == 0 or gameOver(board):
+		return heuristic(board, player)
+	
+	if maximizingPlayer:
+		max_val = MIN
+		for (b,(x,y)) in getMoves(board, player):
+			val = minimax(copy.deepcopy(b),getotherPlayer(player),depth-1,False)
+			max_val = max(max_val, val)
+		
+		return max_val
+
+	else:
+		min_val = MAX
+		for (b,(x,y)) in getMoves(board, player):
+			val = minimax(copy.deepcopy(b),getotherPlayer(player),depth-1,True)
+			min_val = min(min_val, val)
+		
+		return min_val
+
+
 def run():
 	# create 8 by 8 board
 	board = []
 	for x in range(8):
 		board.append([' '] * 8)
 	
+
+
 	board[3][3] = 'W'
 	board[3][4] = 'B'
 	board[4][3] = 'B'
@@ -173,10 +298,11 @@ def run():
 	otherPlayer = 'W'
 
 	while not isBoardFull(board):
+		cls()
 		printBoard(board)
 
 		# game over!
-		if len(getPossibleMoves(board, player)) == 0 and len(getPossibleMoves(board, otherPlayer)) == 0: break
+		if gameOver(board): break
 
 		tmp = promptMove(board, player)
 		if not tmp == False:
