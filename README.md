@@ -7,6 +7,8 @@ Trabalho desenvolvido para a disciplina de Inteligência Artificial do curso de 
 
 
 Fontes:
+
+
 http://dhconnelly.com/paip-python/docs/paip/othello.html
 https://courses.cs.washington.edu/courses/cse573/04au/Project/mini1/RUSSIA/Final_Paper.pdf
 https://www.geeksforgeeks.org/minimax-algorithm-in-game-theory-set-1-introduction/
