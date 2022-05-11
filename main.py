@@ -22,9 +22,9 @@ WEIGHTS = [
 ]
 
 IA = 'W'
-MIN = -200
-MAX = 200
-DEPTH = 3
+MIN = -999
+MAX = 999
+DEPTH = 5
 
 def cls():
     if name == 'nt':
@@ -159,7 +159,7 @@ def promptMove(board, player):
 	if player == IA:
 		max = (MIN,)
 		for (b,(x,y)) in getMoves(board, player):
-			h = minimax(b, player, DEPTH, True)
+			h = minimax(b, player, DEPTH, MIN, MAX, True)
 			print(x,y, ':', h)
 			if h > max[0]:
 				max = (h,x,y)
@@ -262,7 +262,7 @@ def heuristic(board, player):
 		return total + int(b/2) 
 
 
-def minimax(board, player, depth, maximizingPlayer):
+def minimax(board, player, depth, alfha, beta,  maximizingPlayer):
 	
 	if depth == 0 or gameOver(board):
 		return heuristic(board, player)
@@ -270,16 +270,22 @@ def minimax(board, player, depth, maximizingPlayer):
 	if maximizingPlayer:
 		max_val = MIN
 		for (b,(x,y)) in getMoves(board, player):
-			val = minimax(copy.deepcopy(b),player,depth-1,False)
+			val = minimax(copy.deepcopy(b),player,depth-1, alfha, beta, False)
 			max_val = max(max_val, val)
+			alfha = max(alfha, val)
+			if beta <= alfha:
+				break
 		
 		return max_val
 
 	else:
 		min_val = MAX
 		for (b,(x,y)) in getMoves(board, player):
-			val = minimax(copy.deepcopy(b),player,depth-1,True)
+			val = minimax(copy.deepcopy(b),player,depth-1, alfha, beta, True)
 			min_val = min(min_val, val)
+			beta = min(beta, val)
+			if beta <= alfha:
+				break
 		
 		return min_val
 
