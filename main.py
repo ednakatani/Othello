@@ -31,7 +31,7 @@ def cls():
         _ = system('cls')
     else:
         _ = system('clear')
-		
+
 def getotherPlayer(player) -> str:
 	if player == 'W':
 		return 'B'
@@ -160,6 +160,7 @@ def promptMove(board, player):
 		max = (MIN,)
 		for (b,(x,y)) in getMoves(board, player):
 			h = minimax(b, player, DEPTH, True)
+			print(x,y, ':', h)
 			if h > max[0]:
 				max = (h,x,y)
 		
@@ -170,12 +171,10 @@ def promptMove(board, player):
 
 		while (xMove, yMove) not in possibilites:
 			while xMove < 0 or xMove >= len(board):
-				print('Enter a x coordinate(column):')
-				xMove = int(input())
+				xMove = int(input('X: '))
 
 			while yMove < 0 or yMove >= len(board):
-				print('Enter a y coordinate(row):')
-				yMove = int(input())
+				yMove = int(input('Y: '))
 
 			if (xMove, yMove) not in possibilites:
 				xMove = -1
@@ -248,7 +247,7 @@ def getTree(board, depth, player):
 		getMoves(board, p)
 
 def heuristic(board, player):
-
+	(b,w) = getScore(board)
 	total = 0
 	for x in range(len(board)):
 		for y in range(len(board[x])):
@@ -256,7 +255,11 @@ def heuristic(board, player):
 				total += WEIGHTS[x][y]
 			elif board[x][y] != '':
 				total -= WEIGHTS[x][y]
-	return total
+	
+	if player == 'W':
+		return total + int(w/2)
+	else:
+		return total + int(b/2) 
 
 
 def minimax(board, player, depth, maximizingPlayer):
@@ -267,7 +270,7 @@ def minimax(board, player, depth, maximizingPlayer):
 	if maximizingPlayer:
 		max_val = MIN
 		for (b,(x,y)) in getMoves(board, player):
-			val = minimax(copy.deepcopy(b),getotherPlayer(player),depth-1,False)
+			val = minimax(copy.deepcopy(b),player,depth-1,False)
 			max_val = max(max_val, val)
 		
 		return max_val
@@ -275,7 +278,7 @@ def minimax(board, player, depth, maximizingPlayer):
 	else:
 		min_val = MAX
 		for (b,(x,y)) in getMoves(board, player):
-			val = minimax(copy.deepcopy(b),getotherPlayer(player),depth-1,True)
+			val = minimax(copy.deepcopy(b),player,depth-1,True)
 			min_val = min(min_val, val)
 		
 		return min_val
@@ -298,7 +301,7 @@ def run():
 	otherPlayer = 'W'
 
 	while not isBoardFull(board):
-		cls()
+		#cls()
 		printBoard(board)
 
 		# game over!
