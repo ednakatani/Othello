@@ -1,13 +1,9 @@
-'''
-Two Player Console Othello(NO AI)
-Written by Patrick Feltes
-11/2/15
-'''
-
 import copy
 from os import system, name
 
-
+'''
+The weigths by board positions 
+'''
 WEIGHTS = [
 
   [ 4, -3,  2,  2,  2,  2, -3,  4],
@@ -27,12 +23,18 @@ MAX = 999
 DEPTH = 5
 
 def cls():
-    if name == 'nt':
-        _ = system('cls')
-    else:
-        _ = system('clear')
+	'''
+	Clear the console screen
+	'''
+	if name == 'nt':
+		_ = system('cls')
+	else:
+		_ = system('clear')
 
 def getotherPlayer(player) -> str:
+	'''
+	Return the other possible player
+	'''
 	if player == 'W':
 		return 'B'
 	else:
@@ -74,7 +76,7 @@ def getPossibleMoves(board: list, player) -> list:
 	'''
 	Iterate over the game board, searching possible moves for the player
 	'''
-	# seems like this could be made more efficient, why populate so many lists if unnecessary?
+	
 	moves = []
 
 	for x in range(len(board)):
@@ -93,6 +95,9 @@ def isLegalMove(board: list, r: int, c: int, player) -> bool:
 	return board[r][c] == ' '
 
 def getIncludedPieces(board, xStart, yStart, xDir, yDir, player) -> list:
+	'''
+	Get list of pieces in the board and their positions
+	'''
 	included = []
 
 	if player == 'B':
@@ -119,6 +124,9 @@ def getIncludedPieces(board, xStart, yStart, xDir, yDir, player) -> list:
 	return []
 
 def getPiecesToFlip(board, x, y, player):
+	'''
+	Get list of the positions required to complete a move
+	'''
 	# get positions of all pieces to be flipped by a move
 	flip = []
 
@@ -138,12 +146,18 @@ def getPiecesToFlip(board, x, y, player):
 	return list(set(flip))
 
 def flipPieces(board, flip, player):
+	'''
+	Flip the positions required to complete a move
+	'''
 	for pos in flip:
 		board[pos[1]][pos[0]] = player
 
 	return board
 
 def promptMove(board, player):
+	'''
+	Print the console, get user inputs, call game functions
+	'''
 	print(player + " player's turn!")
 	
 	possibilites = getPossibleMoves(board, player)
@@ -158,23 +172,34 @@ def promptMove(board, player):
 	
 	if player == IA:
 		max = (MIN,)
+		#Call minimax for each possible move
 		for (b,(x,y)) in getMoves(board, player):
 			h = minimax(b, player, DEPTH, MIN, MAX, True)
-			print(x,y, ':', h)
+			#print(x,y, ':', h)
 			if h > max[0]:
 				max = (h,x,y)
 		
 		xMove = max[1]
-		yMove = max[2]	
+		yMove = max[2]
+
+		print('IA:', xMove, yMove)
 	
 	else:
 
+		#print(possibilites)
+
 		while (xMove, yMove) not in possibilites:
 			while xMove < 0 or xMove >= len(board):
-				xMove = int(input('X: '))
+				try:
+					xMove = int(input('X: '))
+				except:
+					continue
 
 			while yMove < 0 or yMove >= len(board):
-				yMove = int(input('Y: '))
+				try:
+					yMove = int(input('Y: '))
+				except:
+					continue
 
 			if (xMove, yMove) not in possibilites:
 				xMove = -1
@@ -188,19 +213,10 @@ def promptMove(board, player):
 
 	return board
 
-def MakeMove(board, x, y, player):
-	temp_board = [x[:] for x in board]
-	temp_flip = getPiecesToFlip(temp_board, x, y, player)
-	temp_board[y][x] = player
-
-	temp_board = flipPieces(temp_board, temp_flip, player)
-	(b,w) = getScore(temp_board)
-	if player == "B":
-		return (temp_board,w)
-	
-	return (temp_board,b)
-
 def isBoardFull(board) -> bool:
+	'''
+	Verify if the board is full
+	'''
 	full = True
 
 	for r in board:
@@ -210,9 +226,15 @@ def isBoardFull(board) -> bool:
 	return full
 
 def gameOver(board):
+	'''
+	Checks for possible moves
+	'''
 	return len(getPossibleMoves(board, 'W')) == 0 and len(getPossibleMoves(board, 'B')) == 0
 
 def getMoves(board,player):
+	'''
+	Get possible moves for a board and player
+	'''
 	possibilites = getPossibleMoves(board, player)
 	moves = []
 	
@@ -236,17 +258,11 @@ def getMoves(board,player):
 
 	return moves
 
-def getTree(board, depth, player):
-	p = ''
-	for i in range(depth):
-		if i%2 == 0: 
-			p = player
-		else:
-			p = getotherPlayer(player) 
-		
-		getMoves(board, p)
-
 def heuristic(board, player):
+	'''
+	Calculates the heuristic value of a board for a especific player.
+	Based on the Weights table
+	'''
 	(b,w) = getScore(board)
 	total = 0
 	for x in range(len(board)):
@@ -256,14 +272,12 @@ def heuristic(board, player):
 			elif board[x][y] != '':
 				total -= WEIGHTS[x][y]
 	
-	if player == 'W':
-		return total + int(w/2)
-	else:
-		return total + int(b/2) 
-
+	return total
 
 def minimax(board, player, depth, alfha, beta,  maximizingPlayer):
-	
+	'''
+	Minimax recursive function with alpha-beta prunning
+	'''
 	if depth == 0 or gameOver(board):
 		return heuristic(board, player)
 	
@@ -288,7 +302,6 @@ def minimax(board, player, depth, alfha, beta,  maximizingPlayer):
 				break
 		
 		return min_val
-
 
 def run():
 	# create 8 by 8 board
