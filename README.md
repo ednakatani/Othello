@@ -3,7 +3,7 @@
 Trabalho desenvolvido para a disciplina de Inteligência Artificial do curso de Ciência da Computação da PUCPR.
 
 
-Implementação do Jogo Othello (Reversi) com Inteligência Artificial do tipo MiniMax com poda da árvore alfa-beta.
+Implementação do Jogo Othello (Reversi) com Inteligência Artificial do tipo MiniMax e poda da árvore alfa-beta.
 
 ![image](https://user-images.githubusercontent.com/55983395/167923312-3b82d79e-924d-4664-bb68-b9d954af5ca8.png)
 
