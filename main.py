@@ -1,4 +1,4 @@
-import copy
+import copy, random
 from os import system, name
 
 '''
@@ -18,9 +18,9 @@ WEIGHTS = [
 ]
 
 IA = 'W'
-MIN = -999
-MAX = 999
-DEPTH = 5
+CMIN = -999
+CMAX = 999
+DEPTH = 3
 
 def cls():
 	'''
@@ -171,14 +171,15 @@ def promptMove(board, player):
 
 	
 	if player == IA:
-		max = (MIN,)
+		max = (CMIN,)
 		#Call minimax for each possible move
 		for (b,(x,y)) in getMoves(board, player):
-			h = minimax(b, player, DEPTH, MIN, MAX, True)
+			h = minimax(b, player, DEPTH, CMIN, CMAX, True)
 			#print(x,y, ':', h)
-			if h > max[0]:
+			if h >= max[0]:
 				max = (h,x,y)
 		
+		print(max)
 		xMove = max[1]
 		yMove = max[2]
 
@@ -272,6 +273,7 @@ def heuristic(board, player):
 			elif board[x][y] != '':
 				total -= WEIGHTS[x][y]
 	
+	total += random.randint(-10, 10)
 	return total
 
 def minimax(board, player, depth, alfha, beta,  maximizingPlayer):
@@ -282,7 +284,7 @@ def minimax(board, player, depth, alfha, beta,  maximizingPlayer):
 		return heuristic(board, player)
 	
 	if maximizingPlayer:
-		max_val = MIN
+		max_val = CMIN
 		for (b,(x,y)) in getMoves(board, player):
 			val = minimax(copy.deepcopy(b),player,depth-1, alfha, beta, False)
 			max_val = max(max_val, val)
@@ -293,7 +295,7 @@ def minimax(board, player, depth, alfha, beta,  maximizingPlayer):
 		return max_val
 
 	else:
-		min_val = MAX
+		min_val = CMAX
 		for (b,(x,y)) in getMoves(board, player):
 			val = minimax(copy.deepcopy(b),player,depth-1, alfha, beta, True)
 			min_val = min(min_val, val)
@@ -340,5 +342,7 @@ def run():
 		print('White wins!')
 	else:
 		print('Tie?')
+	
+	printBoard(board)
 
 run()
